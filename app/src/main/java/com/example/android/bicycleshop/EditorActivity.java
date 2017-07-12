@@ -269,8 +269,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         values.put(BicycleEntry.COLUMN_PRICE, priceString);
         values.put(BicycleEntry.COLUMN_SUPPLIER, supplierString);
 
-        //TODO if items are not input by users, dont try to parse
-
         //if this is a new bicycle, insert into database, otherwise update the database
         //notify the user of the success/failure of each action
         if (mCurrentBicycleUri == null) {
@@ -349,7 +347,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
             String bikeModel = data.getString(modelColumnIndex);
             int bikeType = data.getInt(typeColumnIndex);
-            int mQuantity = data.getInt(quantityColumnIndex);
             String bikePrice = data.getString(priceColumnIndex);
             String bikeSupplier = data.getString(supplierColumnIndex);
 
@@ -417,7 +414,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     //set method for ordering supplier to order more stock
-    public void emailSupplier(){
+    public void emailSupplier(View v){
         Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
         emailIntent.setData(Uri.parse("mailto:"));
         emailIntent.putExtra(Intent.EXTRA_EMAIL, "example@gmail.com");
@@ -426,10 +423,5 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             startActivity(emailIntent);
         }
     }
-        //TODO show a dialogue that warns users about unsaved changes
-
-        //TODO on back button pressed, warn user of unsaved changes
-
-
 }
 

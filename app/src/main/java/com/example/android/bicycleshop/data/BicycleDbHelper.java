@@ -34,7 +34,6 @@ public class BicycleDbHelper extends SQLiteOpenHelper {
                 + BicycleEntry.COLUMN_PRICE + " INTEGER NOT NULL, "
                 + BicycleEntry.COLUMN_QUANTITY + " INTEGER, "
                 + BicycleEntry.COLUMN_SUPPLIER + " TEXT);";
-        //TODO return quantity to NOT NULL status
         //TODO add in images column
 
         // Execute the SQL statement
