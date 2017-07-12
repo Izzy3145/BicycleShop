@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <!-- These are the options displayed in the gender drop-down Spinner -->
+    <string-array name="array_type_options">
+        <item>@string/type_tourer</item>
+        <item>@string/type_road</item>
+        <item>@string/type_triathlon</item>
+        <item>@string/type_mountain</item>
+        <item>@string/type_hybrid</item>
+        <item>@string/type_unknown</item>
+    </string-array>
+</resources>

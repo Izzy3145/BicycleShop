@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">BicycleShop</string>
+    <string name="edit_bicycle">Edit Bicycle</string>
+    <string name="add_new_bicycle">Add Bicycle</string>
+    <string name="type_tourer">Tourer</string>
+    <string name="type_road">Road</string>
+    <string name="type_triathlon">Triathlon</string>
+    <string name="type_mountain">Mountain</string>
+    <string name="type_hybrid">Hybrid</string>
+    <string name="type_unknown">Unknown</string>
+    <string name="supplier_email_hint">company@gmail.com</string>
+    <string name="pound_sign">£</string>
+    <string name="price_hint">GBP</string>
+    <string name="model_hint">e.g. Genesis Tour de Fer</string>
+    <string name="plus_sign">+</string>
+    <string name="minus_sign">-</string>
+    <string name="quantity_hint">enter quantity</string>
+    <string name="reorder">Reorder</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="insert_dummy">Insert Dummy Data</string>
+    <string name="delete_all">Delete All Entries</string>
+    <string name="error_inserting">Error adding bicycle</string>
+    <string name="insertion_complete">Bicycle successfully added</string>
+    <string name="error_updating">Error updating bicycle</string>
+    <string name="update_complete">Bicycle successfully updated</string>
+    <string name="delete_error">Error deleting bicycle</string>
+    <string name="delete_complete">Bicycle successfully deleted</string>
+    <string name="delete_confirmation">Delete this bicycle?</string>
+    <string name="cancel">Cancel</string>
+    <string name="sale">Sale</string>
+    <string name="quantity">Quantity remaining: </string>
+    <string name="price">Price: </string>
+
+
+</resources>
