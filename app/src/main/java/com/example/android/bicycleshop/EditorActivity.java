@@ -18,12 +18,16 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.bicycleshop.data.BicycleContract;
 import com.example.android.bicycleshop.data.BicycleContract.BicycleEntry;
+
+import static java.security.AccessController.getContext;
 
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -43,6 +47,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private EditText mModelEditText;
     private EditText mPriceEditText;
     private int mQuantity;
+    private TextView mQuantityTextView;
+    private Button mPlusOneStock;
+    private Button mLessOneStock;
     private EditText mSupplierEditText;
 
     //set up the onTouchListener variable, default is false
@@ -89,13 +96,37 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mModelEditText = (EditText)findViewById(R.id.model);
         mPriceEditText = (EditText)findViewById(R.id.price);
         mSupplierEditText = (EditText)findViewById(R.id.supplier);
+        mQuantityTextView = (TextView)findViewById(R.id.quantity);
+
+        mPlusOneStock = (Button)findViewById(R.id.plus_one_stock);
+        mPlusOneStock.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mQuantity++;
+                mQuantityTextView.setText(String.valueOf(mQuantity));
+            }
+        });
+
+        mLessOneStock = (Button)findViewById(R.id.less_one_stock);
+        mLessOneStock.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mQuantity > 0) {
+                    mQuantity--;
+                    mQuantityTextView.setText(String.valueOf(mQuantity));
+                }else{
+                    Toast.makeText(EditorActivity.this, getString(R.string.out_of_stock),Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         //set up onTouchListeners on each view, so we know when something has been changed
         mModelEditText.setOnTouchListener(mTouchListener);
         mTypeSpinner.setOnTouchListener(mTouchListener);
-        //TODO mQuantity.setOnTouchListener(mTouchListener);
         mPriceEditText.setOnTouchListener(mTouchListener);
         mSupplierEditText.setOnTouchListener(mTouchListener);
+        mPlusOneStock.setOnTouchListener(mTouchListener);
+        mLessOneStock.setOnTouchListener(mTouchListener);
     }
 
     //set up spinner for 'Type'
@@ -168,13 +199,53 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             case R.id.action_delete:
                 deletionDialogue();
                 return true;
-            //TODO set up R.id.home, which uses ifBicycleHasChanged
         }
-
-        //TODO onBackPressed, which uses ifBicycleHasChanged
-
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onBackPressed() {
+        // If no fields have  changed, continue with handling back button press
+        if (!mBicycleHasChanged) {
+            super.onBackPressed();
+            return;
+        }
+        // If some fields have changed, setup a dialog to warn the user.
+        DialogInterface.OnClickListener discardButtonClickListener =
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // "Discard" button clicked, close the current activity.
+                        finish();
+                    }
+                };
+
+        // Show dialog that there are unsaved changes
+        showUnsavedChangesDialog(discardButtonClickListener);
+    }
+
+    //unsaved changes dialogue, to sometimes be used when back button is pressed
+    private void showUnsavedChangesDialog(
+
+            DialogInterface.OnClickListener discardButtonClickListener) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                //set initial message
+                builder.setMessage(R.string.unsaved_changes_message);
+                //set positive and negative response messages, if negative, dismiss dialogue
+                builder.setPositiveButton(R.string.discard, discardButtonClickListener);
+                builder.setNegativeButton(R.string.continue_editing, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
 
     //set up method for INSERTING or UPDATING a bicycle
     private void saveBicycle(){
@@ -194,7 +265,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         ContentValues values = new ContentValues();
         values.put(BicycleEntry.COLUMN_BIKE_MODEL, modelString);
         values.put(BicycleEntry.COLUMN_BIKE_TYPE, mType);
-        //TODO values.put(BicycleEntry.COLUMN_QUANTITY, mQuantity);
+        values.put(BicycleEntry.COLUMN_QUANTITY, mQuantity);
         values.put(BicycleEntry.COLUMN_PRICE, priceString);
         values.put(BicycleEntry.COLUMN_SUPPLIER, supplierString);
 
@@ -278,13 +349,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
             String bikeModel = data.getString(modelColumnIndex);
             int bikeType = data.getInt(typeColumnIndex);
-            //TODO deal with quantity
-            int bikeQuantity = data.getInt(quantityColumnIndex);
+            int mQuantity = data.getInt(quantityColumnIndex);
             String bikePrice = data.getString(priceColumnIndex);
             String bikeSupplier = data.getString(supplierColumnIndex);
 
             mModelEditText.setText(bikeModel);
             mPriceEditText.setText(bikePrice);
+            mQuantityTextView.setText(String.valueOf(mQuantity));
             mSupplierEditText.setText(bikeSupplier);
             //set up a switch statement for type, that will display the right spinner selection
             switch(bikeType){
@@ -306,7 +377,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 default:
                     mTypeSpinner.setSelection(5);
             }
-
         }
     }
 
@@ -316,6 +386,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mModelEditText.setText("");
         mTypeSpinner.setSelection(5);
         mPriceEditText.setText("");
+        mQuantityTextView.setText(String.valueOf(0));
         mSupplierEditText.setText("");
     }
 
@@ -344,9 +415,18 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
     }
-        //TODO show a dialogue that warns users about unsaved changes
 
-        //TODO prompt user to confirm that they want to delete the bicycle
+    //set method for ordering supplier to order more stock
+    public void emailSupplier(){
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+        emailIntent.setData(Uri.parse("mailto:"));
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, "example@gmail.com");
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "New Bicycle Order");
+        if (emailIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(emailIntent);
+        }
+    }
+        //TODO show a dialogue that warns users about unsaved changes
 
         //TODO on back button pressed, warn user of unsaved changes
 

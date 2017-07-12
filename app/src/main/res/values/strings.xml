@@ -9,11 +9,12 @@
     <string name="type_hybrid">Hybrid</string>
     <string name="type_unknown">Unknown</string>
     <string name="supplier_email_hint">company@gmail.com</string>
-    <string name="pound_sign">£</string>
+    <string name="pound_sign">£ </string>
     <string name="price_hint">GBP</string>
     <string name="model_hint">e.g. Genesis Tour de Fer</string>
     <string name="plus_sign">+</string>
     <string name="minus_sign">-</string>
+    <string name="quantity_zero">0</string>
     <string name="quantity_hint">enter quantity</string>
     <string name="reorder">Reorder</string>
     <string name="save">Save</string>
@@ -31,6 +32,9 @@
     <string name="sale">Sale</string>
     <string name="quantity">Quantity remaining: </string>
     <string name="price">Price: </string>
-
-
+    <string name="out_of_stock">Out of stock!</string>
+    <string name="left_in_stock">left in stock</string>
+    <string name="unsaved_changes_message">Leave without saving changes?</string>
+    <string name="discard">Discard</string>
+    <string name="continue_editing">Continue editing</string>
 </resources>

@@ -53,18 +53,18 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/incremental_increase"
+            android:id="@+id/plus_one_stock"
             android:text="@string/plus_sign"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/quantity" />
+            android:id="@+id/quantity"/>
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/incremental_decrease"
+            android:id="@+id/less_one_stock"
             android:text="@string/minus_sign"/>
 
         </LinearLayout>
@@ -116,7 +116,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/reorder_button"
-            android:text="@string/reorder"/>
+            android:text="@string/reorder"
+            android:onClick="emailSupplier"/>
 
     </LinearLayout>
 

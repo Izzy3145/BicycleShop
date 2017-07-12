@@ -15,6 +15,11 @@ import com.example.android.bicycleshop.data.BicycleContract.BicycleEntry;
 
 import org.xml.sax.ContentHandler;
 
+import static android.R.attr.name;
+import static android.R.attr.type;
+import static com.example.android.bicycleshop.R.id.model;
+import static com.example.android.bicycleshop.R.id.supplier;
+
 
 /**
  * Created by izzystannett on 09/07/2017.
@@ -120,7 +125,31 @@ public class BicycleProvider extends ContentProvider {
     }
 
     private Uri insertBicycle(Uri uri, ContentValues values) {
-        //TODO data validation, if not null etc, check project rubric
+        //check for null values, and throw error if null
+        String model = values.getAsString(BicycleEntry.COLUMN_BIKE_MODEL);
+        if (model == null) {
+            throw new IllegalArgumentException("Model needs specifying");
+        }
+
+        Integer type = values.getAsInteger(BicycleEntry.COLUMN_BIKE_TYPE);
+        if (type == null || !BicycleEntry.isValidType(type)) {
+            throw new IllegalArgumentException("Valid bicycle type needs specifying");
+        }
+
+        Integer quantity = values.getAsInteger(BicycleEntry.COLUMN_QUANTITY);
+        if (quantity == null) {
+            throw new IllegalArgumentException("Quantity needs specified");
+        }
+
+        String price = values.getAsString(BicycleEntry.COLUMN_PRICE);
+        if (price == null) {
+            throw new IllegalArgumentException("Price needs specifying");
+        }
+
+        String supplier = values.getAsString(BicycleEntry.COLUMN_SUPPLIER);
+        if (supplier == null) {
+            throw new IllegalArgumentException("Supplier needs specifying");
+        }
 
         //get writeable database to insert row into
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
@@ -195,7 +224,42 @@ public class BicycleProvider extends ContentProvider {
     }
 
     private int updateBicycle(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        //TODO data validation
+        //check for null values, and throw error if null
+        if(values.containsKey(BicycleEntry.COLUMN_BIKE_MODEL)) {
+            String model = values.getAsString(BicycleEntry.COLUMN_BIKE_MODEL);
+            if (model == null) {
+                throw new IllegalArgumentException("Model needs specifying");
+            }
+        }
+
+        if(values.containsKey(BicycleEntry.COLUMN_BIKE_TYPE)) {
+            Integer type = values.getAsInteger(BicycleEntry.COLUMN_BIKE_TYPE);
+            if (type == null || !BicycleEntry.isValidType(type)) {
+                throw new IllegalArgumentException("Valid bicycle type needs specifying");
+            }
+        }
+
+        if(values.containsKey(BicycleEntry.COLUMN_QUANTITY)){
+            Integer quantity = values.getAsInteger(BicycleEntry.COLUMN_QUANTITY);
+            if (quantity == null) {
+                throw new IllegalArgumentException("Quantity needs specified");
+            }
+        }
+
+        if(values.containsKey(BicycleEntry.COLUMN_PRICE)) {
+            String price = values.getAsString(BicycleEntry.COLUMN_PRICE);
+            if (price == null) {
+                throw new IllegalArgumentException("Price needs specifying");
+            }
+        }
+
+        if(values.containsKey(BicycleEntry.COLUMN_SUPPLIER)) {
+            String supplier = values.getAsString(BicycleEntry.COLUMN_SUPPLIER);
+            if (supplier == null) {
+                throw new IllegalArgumentException("Supplier needs specifying");
+            }
+        }
+
         //only proceed if values have been provided, otherwise return 0
         if (values.size() == 0) {
             return 0;

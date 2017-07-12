@@ -12,7 +12,6 @@ import android.provider.BaseColumns;
 
 public final class BicycleContract {
 
-
     //empty constructor
     private BicycleContract() {};
 
@@ -27,7 +26,6 @@ public final class BicycleContract {
     //inner class that defines constant values for the table
     //each entry is a single Bicycle
     public static final class BicycleEntry implements BaseColumns {
-        //TODO define content URI to access the pet data in the provider
 
         //set up MIME types to pass into the Content Provider's getType method.
         //for whole table

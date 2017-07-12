@@ -22,7 +22,13 @@
             android:authorities="com.example.android.bicycles"
             android:exported="false" />
 
-        <activity android:name=".EditorActivity"></activity>
+        <activity android:name=".EditorActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SENDTO" />
+                <data android:scheme="mailto" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

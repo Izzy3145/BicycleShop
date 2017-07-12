@@ -1,12 +1,17 @@
 package com.example.android.bicycleshop;
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.bicycleshop.data.BicycleContract;
 import com.example.android.bicycleshop.data.BicycleContract.BicycleEntry;
@@ -33,24 +38,50 @@ public class BicycleCursorAdapter extends CursorAdapter {
 
     //binds data to the list item view
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(View view, final Context context, Cursor cursor) {
         TextView modelTextView = (TextView)view.findViewById(R.id.model_list_item);
         TextView priceTextView = (TextView)view.findViewById(R.id.price_list_item);
         TextView quantityTextView = (TextView)view.findViewById(R.id.quantity_list_item);
 
         //find the columns of the attributes that we want to display
-        int modelColumnIndex = cursor.getColumnIndex(BicycleEntry.COLUMN_BIKE_MODEL);
-        int priceColumnIndex = cursor.getColumnIndex(BicycleEntry.COLUMN_PRICE);
-        int quantityColumnIndex = cursor.getColumnIndex(BicycleEntry.COLUMN_QUANTITY);
+        int modelColumnIndex = cursor.getColumnIndexOrThrow(BicycleEntry.COLUMN_BIKE_MODEL);
+        int priceColumnIndex = cursor.getColumnIndexOrThrow(BicycleEntry.COLUMN_PRICE);
+        int quantityColumnIndex = cursor.getColumnIndexOrThrow(BicycleEntry.COLUMN_QUANTITY);
 
         //retrieve data from the appropriate columns
         String bicycleModel = cursor.getString(modelColumnIndex);
         String bicyclePrice = cursor.getString(priceColumnIndex);
-        String bicycleQuantity = cursor.getString(quantityColumnIndex);
+        final int bicycleQuantity = cursor.getInt(quantityColumnIndex);
 
         //update the text views with the values from the database
         modelTextView.setText(bicycleModel);
-        priceTextView.setText(bicyclePrice);
-        quantityTextView.setText(bicycleQuantity);
+        String bicyclePriceWithSign = context.getString(R.string.pound_sign) + bicyclePrice;
+        priceTextView.setText(bicyclePriceWithSign);
+        String quantityAvailable = bicycleQuantity + " " + context.getString(R.string.left_in_stock);
+        quantityTextView.setText(quantityAvailable);
+
+        //get current URI
+        final Uri uri = ContentUris.withAppendedId(BicycleContract.CONTENT_URI, cursor.getInt(cursor.getColumnIndexOrThrow(BicycleEntry._ID)));
+
+        //method for when Sale button is clicked, to reduce quantity by one if one in stock
+        //and save the new quantity into the database
+        Button saleButton = (Button) view.findViewById(R.id.sale_button);
+        saleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (bicycleQuantity > 0) {
+                    int reducedQuantity = bicycleQuantity - 1;
+
+                    // Create a new ContentValue object with reduced quantity
+                    ContentValues values = new ContentValues();
+                    values.put(BicycleEntry.COLUMN_QUANTITY, reducedQuantity);
+                    // Pass the new values into the database
+                    context.getContentResolver().update(uri, values, null, null);
+                } else {
+                    // Inform the user that quantity is zero and can't be updated
+                    Toast.makeText(context, context.getString(R.string.out_of_stock), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 }

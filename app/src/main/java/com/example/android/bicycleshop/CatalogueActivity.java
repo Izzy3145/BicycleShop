@@ -117,7 +117,7 @@ public class CatalogueActivity extends AppCompatActivity implements LoaderManage
         values.put(BicycleEntry.COLUMN_BIKE_MODEL, "Ribble R872");
         values.put(BicycleEntry.COLUMN_BIKE_TYPE, BicycleEntry.TYPE_HYBRID);
         values.put(BicycleEntry.COLUMN_PRICE, "820");
-        values.put(BicycleEntry.COLUMN_QUANTITY, "5");
+        values.put(BicycleEntry.COLUMN_QUANTITY, 5);
         values.put(BicycleEntry.COLUMN_SUPPLIER, "ribble@gmail.com");
 
         // Insert a new row for Toto into the provider using the ContentResolver.
