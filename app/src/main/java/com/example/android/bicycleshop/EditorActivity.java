@@ -9,8 +9,8 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -24,7 +24,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -38,12 +37,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.example.android.bicycleshop.data.BicycleProvider.LOG_TAG;
-import static java.security.AccessController.getContext;
 
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     //initialize a Cursor loader
     private static final int EDITOR_BICYCLE_LOADER = 0;
+    //constant to be used in gallery intent
+    private static final int PICK_IMAGE = 0;
     /// Uri of image on the device's storage
     private static Uri mImageUri;
     //initialise the variables that will be used here
@@ -54,9 +54,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private int mType = BicycleEntry.TYPE_UNKNOWN;
     //check for valid data
     private boolean validData = true;
-    //constant to be used in gallery intent
-    private static final int PICK_IMAGE = 0;
-
     //intialize the views
     private ImageView mImageView;
     private Button mImageButton;
@@ -109,7 +106,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         //set other views
         mImageView = (ImageView) findViewById(R.id.image_view);
-        mImageButton = (Button)findViewById(R.id.image_button);
+        mImageButton = (Button) findViewById(R.id.image_button);
         mModelEditText = (EditText) findViewById(R.id.model);
         mPriceEditText = (EditText) findViewById(R.id.price);
         mSupplierEditText = (EditText) findViewById(R.id.supplier);
@@ -149,16 +146,17 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                getIntent.setType("image/*");
+                Intent intent;
 
-                Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                pickIntent.setType("image/*");
+                if (Build.VERSION.SDK_INT < 19) {
+                    intent = new Intent(Intent.ACTION_GET_CONTENT);
+                } else {
+                    intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                }
 
-                Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
-                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent});
-
-                startActivityForResult(chooserIntent, PICK_IMAGE);
+                intent.setType("image/*");
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
             }
         });
     }
@@ -167,7 +165,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == PICK_IMAGE) {
+        if (requestCode == PICK_IMAGE) {
             //make sure request was successful
             if (resultCode == RESULT_OK) {
                 mImageUri = data.getData();
@@ -183,9 +181,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
-    public Bitmap getBitmapFromUri(Uri uri) {
+    public Bitmap getBitmapFromUri(Uri mImageUri) {
 
-        if (uri == null || uri.toString().isEmpty())
+        if (mImageUri == null || mImageUri.toString().isEmpty())
             return null;
 
         // Get the dimensions of the View
@@ -194,7 +192,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         InputStream input = null;
         try {
-            input = this.getContentResolver().openInputStream(uri);
+            input = this.getContentResolver().openInputStream(mImageUri);
 
             // Get the dimensions of the bitmap
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
@@ -211,9 +209,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             // Decode the image file into a Bitmap sized to fill the View
             bmOptions.inJustDecodeBounds = false;
             bmOptions.inSampleSize = scaleFactor;
-            bmOptions.inPurgeable = true;
 
-            input = this.getContentResolver().openInputStream(uri);
+            input = this.getContentResolver().openInputStream(mImageUri);
             Bitmap bitmap = BitmapFactory.decodeStream(input, null, bmOptions);
             input.close();
             return bitmap;
@@ -395,7 +392,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         } else if (mQuantity < 0) {
             Toast.makeText(this, getString(R.string.valid_quantity), Toast.LENGTH_SHORT).show();
             validData = false;
-            //TODO: check image is not null
         } else if (TextUtils.isEmpty(priceString)) {
             Toast.makeText(this, getString(R.string.valid_price), Toast.LENGTH_SHORT).show();
             validData = false;
@@ -584,7 +580,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     public void emailSupplier(View v) {
         Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
         emailIntent.setData(Uri.parse("mailto:"));
-        //TODO: set email address to the EditText entry
         emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"example@gmail.com"});
         emailIntent.putExtra(Intent.EXTRA_SUBJECT, "New Bicycle Order");
         if (emailIntent.resolveActivity(getPackageManager()) != null) {

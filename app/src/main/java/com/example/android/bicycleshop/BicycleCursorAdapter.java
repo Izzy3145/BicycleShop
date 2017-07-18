@@ -17,9 +17,6 @@ import android.widget.Toast;
 import com.example.android.bicycleshop.data.BicycleContract;
 import com.example.android.bicycleshop.data.BicycleContract.BicycleEntry;
 
-import static android.R.attr.name;
-import static android.R.attr.type;
-
 /**
  * Created by izzystannett on 09/07/2017.
  */
@@ -41,10 +38,9 @@ public class BicycleCursorAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, final Context context, Cursor cursor) {
         ImageView pictureImageView = (ImageView) view.findViewById(R.id.list_image_view);
-        TextView modelTextView = (TextView)view.findViewById(R.id.model_list_item);
-        TextView priceTextView = (TextView)view.findViewById(R.id.price_list_item);
-        TextView quantityTextView = (TextView)view.findViewById(R.id.quantity_list_item);
-
+        TextView modelTextView = (TextView) view.findViewById(R.id.model_list_item);
+        TextView priceTextView = (TextView) view.findViewById(R.id.price_list_item);
+        TextView quantityTextView = (TextView) view.findViewById(R.id.quantity_list_item);
 
 
         //find the columns of the attributes that we want to display

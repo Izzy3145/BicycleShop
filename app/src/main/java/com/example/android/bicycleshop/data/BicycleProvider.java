@@ -13,18 +13,6 @@ import android.util.Log;
 
 import com.example.android.bicycleshop.data.BicycleContract.BicycleEntry;
 
-import org.xml.sax.ContentHandler;
-
-import static android.R.attr.name;
-import static android.R.attr.type;
-import static com.example.android.bicycleshop.R.id.model;
-import static com.example.android.bicycleshop.R.id.supplier;
-
-
-/**
- * Created by izzystannett on 09/07/2017.
- */
-
 public class BicycleProvider extends ContentProvider {
 
     //set up log tag
@@ -230,42 +218,42 @@ public class BicycleProvider extends ContentProvider {
 
     private int updateBicycle(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         //check for null values, and throw error if null
-        if(values.containsKey(BicycleEntry.COLUMN_IMAGE)) {
+        if (values.containsKey(BicycleEntry.COLUMN_IMAGE)) {
             String image = values.getAsString(BicycleEntry.COLUMN_IMAGE);
             if (image == null) {
                 throw new IllegalArgumentException("Image needs specifying");
             }
         }
         //check for null values, and throw error if null
-        if(values.containsKey(BicycleEntry.COLUMN_BIKE_MODEL)) {
+        if (values.containsKey(BicycleEntry.COLUMN_BIKE_MODEL)) {
             String model = values.getAsString(BicycleEntry.COLUMN_BIKE_MODEL);
             if (model == null) {
                 throw new IllegalArgumentException("Model needs specifying");
             }
         }
 
-        if(values.containsKey(BicycleEntry.COLUMN_BIKE_TYPE)) {
+        if (values.containsKey(BicycleEntry.COLUMN_BIKE_TYPE)) {
             Integer type = values.getAsInteger(BicycleEntry.COLUMN_BIKE_TYPE);
             if (type == null || !BicycleEntry.isValidType(type)) {
                 throw new IllegalArgumentException("Valid bicycle type needs specifying");
             }
         }
 
-        if(values.containsKey(BicycleEntry.COLUMN_QUANTITY)){
+        if (values.containsKey(BicycleEntry.COLUMN_QUANTITY)) {
             Integer quantity = values.getAsInteger(BicycleEntry.COLUMN_QUANTITY);
             if (quantity == null) {
                 throw new IllegalArgumentException("Quantity needs specified");
             }
         }
 
-        if(values.containsKey(BicycleEntry.COLUMN_PRICE)) {
+        if (values.containsKey(BicycleEntry.COLUMN_PRICE)) {
             String price = values.getAsString(BicycleEntry.COLUMN_PRICE);
             if (price == null) {
                 throw new IllegalArgumentException("Price needs specifying");
             }
         }
 
-        if(values.containsKey(BicycleEntry.COLUMN_SUPPLIER)) {
+        if (values.containsKey(BicycleEntry.COLUMN_SUPPLIER)) {
             String supplier = values.getAsString(BicycleEntry.COLUMN_SUPPLIER);
             if (supplier == null) {
                 throw new IllegalArgumentException("Supplier needs specifying");
