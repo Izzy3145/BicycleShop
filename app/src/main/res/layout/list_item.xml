@@ -3,23 +3,30 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:descendantFocusability="blocksDescendants">
+    android:descendantFocusability="blocksDescendants"
+    android:layout_margin="@dimen/small_border">
 
     <ImageView
         android:layout_width="@dimen/image_size"
         android:layout_height="@dimen/image_size"
         android:id="@+id/list_image_view"
-        android:src="@drawable/bicycle_shadow"/>
+        android:src="@drawable/bicycle_shadow"
+        android:padding="@dimen/small_border"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
     <!-- bike model -->
     <TextView
         android:id="@+id/model_list_item"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:padding="@dimen/small_border"
+        android:textSize="@dimen/title_text"
+        android:textStyle="bold"
+        android:textColor="@color/primary_text"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -31,19 +38,17 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!--price of bike-->
-            <TextView
-                android:text="@string/price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+            <!--price of bike -->
 
             <TextView
                 android:id="@+id/price_list_item"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:padding="@dimen/small_border"
+                android:textSize="@dimen/large_text"
+                android:textColor="@color/secondary_text"/>
 
             <!-- Sale Button -->
-
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -52,25 +57,18 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-        <!-- quantity remaining -->
-        <TextView
-            android:text="@string/quantity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        <!-- quantity remaining-->
 
         <TextView
             android:id="@+id/quantity_list_item"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:padding="@dimen/small_border"
+            android:textSize="@dimen/large_text"
+            android:textColor="@color/secondary_text"/>
 
         </LinearLayout>
 
     </LinearLayout>
 
-    </LinearLayout>
 </LinearLayout>

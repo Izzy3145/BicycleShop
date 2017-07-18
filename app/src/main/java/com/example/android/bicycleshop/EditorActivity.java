@@ -7,12 +7,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -21,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -29,24 +33,33 @@ import android.widget.Toast;
 import com.example.android.bicycleshop.data.BicycleContract;
 import com.example.android.bicycleshop.data.BicycleContract.BicycleEntry;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static com.example.android.bicycleshop.data.BicycleProvider.LOG_TAG;
 import static java.security.AccessController.getContext;
 
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    //initialise the variables that will be used here
-    private Uri mCurrentBicycleUri;
-
     //initialize a Cursor loader
     private static final int EDITOR_BICYCLE_LOADER = 0;
-
+    /// Uri of image on the device's storage
+    private static Uri mImageUri;
+    //initialise the variables that will be used here
+    private Uri mCurrentBicycleUri;
     //initialize the spinner
     private Spinner mTypeSpinner;
-
     //initialize the type
     private int mType = BicycleEntry.TYPE_UNKNOWN;
+    //check for valid data
+    private boolean validData = true;
+    //constant to be used in gallery intent
+    private static final int PICK_IMAGE = 0;
 
     //intialize the views
     private ImageView mImageView;
+    private Button mImageButton;
     private EditText mModelEditText;
     private EditText mPriceEditText;
     private int mQuantity;
@@ -54,14 +67,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private Button mPlusOneStock;
     private Button mLessOneStock;
     private EditText mSupplierEditText;
-
-    /// Uri of image on the device's storage
-    private static Uri mImageUri;
-
     //set up the onTouchListener variable, default is false
     private boolean mBicycleHasChanged = false;
     //set up the on TouchListener method, to be used later in onCreate
-    private View.OnTouchListener mTouchListener = new View.OnTouchListener(){
+    private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             mBicycleHasChanged = true;
@@ -99,13 +108,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         setupSpinner();
 
         //set other views
-        mImageView = (ImageView)findViewById(R.id.image_view);
-        mModelEditText = (EditText)findViewById(R.id.model);
-        mPriceEditText = (EditText)findViewById(R.id.price);
-        mSupplierEditText = (EditText)findViewById(R.id.supplier);
-        mQuantityTextView = (TextView)findViewById(R.id.quantity);
+        mImageView = (ImageView) findViewById(R.id.image_view);
+        mImageButton = (Button)findViewById(R.id.image_button);
+        mModelEditText = (EditText) findViewById(R.id.model);
+        mPriceEditText = (EditText) findViewById(R.id.price);
+        mSupplierEditText = (EditText) findViewById(R.id.supplier);
+        mQuantityTextView = (TextView) findViewById(R.id.quantity);
 
-        mPlusOneStock = (Button)findViewById(R.id.plus_one_stock);
+        mPlusOneStock = (Button) findViewById(R.id.plus_one_stock);
         mPlusOneStock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,31 +124,117 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             }
         });
 
-        mLessOneStock = (Button)findViewById(R.id.less_one_stock);
+        mLessOneStock = (Button) findViewById(R.id.less_one_stock);
         mLessOneStock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mQuantity > 0) {
+                if (mQuantity > 0) {
                     mQuantity--;
                     mQuantityTextView.setText(String.valueOf(mQuantity));
-                }else{
-                    Toast.makeText(EditorActivity.this, getString(R.string.out_of_stock),Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(EditorActivity.this, getString(R.string.out_of_stock), Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
         //set up onTouchListeners on each view, so we know when something has been changed
-        //TODO add onClick listener for image View mImageView.setOnClickListener(setImage());
+        mImageButton.setOnTouchListener(mTouchListener);
         mModelEditText.setOnTouchListener(mTouchListener);
         mTypeSpinner.setOnTouchListener(mTouchListener);
         mPriceEditText.setOnTouchListener(mTouchListener);
         mSupplierEditText.setOnTouchListener(mTouchListener);
         mPlusOneStock.setOnTouchListener(mTouchListener);
         mLessOneStock.setOnTouchListener(mTouchListener);
+
+        mImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                getIntent.setType("image/*");
+
+                Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                pickIntent.setType("image/*");
+
+                Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
+                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent});
+
+                startActivityForResult(chooserIntent, PICK_IMAGE);
+            }
+        });
+    }
+
+    //onActivityResult method gets called when image view is clicked
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == PICK_IMAGE) {
+            //make sure request was successful
+            if (resultCode == RESULT_OK) {
+                mImageUri = data.getData();
+                // Check if the image uri is null
+                if (mImageUri != null) {
+                    // Show the image on the imageView
+                    mImageView.setImageBitmap(getBitmapFromUri(mImageUri));
+                } else {
+                    // Show the placeholder instead
+                    mImageView.setImageDrawable(getResources().getDrawable(R.drawable.bicycle_shadow, null));
+                }
+            }
+        }
+    }
+
+    public Bitmap getBitmapFromUri(Uri uri) {
+
+        if (uri == null || uri.toString().isEmpty())
+            return null;
+
+        // Get the dimensions of the View
+        int targetW = mImageView.getWidth();
+        int targetH = mImageView.getHeight();
+
+        InputStream input = null;
+        try {
+            input = this.getContentResolver().openInputStream(uri);
+
+            // Get the dimensions of the bitmap
+            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+            bmOptions.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(input, null, bmOptions);
+            input.close();
+
+            int photoW = bmOptions.outWidth;
+            int photoH = bmOptions.outHeight;
+
+            // Determine how much to scale down the image
+            int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+            // Decode the image file into a Bitmap sized to fill the View
+            bmOptions.inJustDecodeBounds = false;
+            bmOptions.inSampleSize = scaleFactor;
+            bmOptions.inPurgeable = true;
+
+            input = this.getContentResolver().openInputStream(uri);
+            Bitmap bitmap = BitmapFactory.decodeStream(input, null, bmOptions);
+            input.close();
+            return bitmap;
+
+        } catch (FileNotFoundException fne) {
+            Log.e(LOG_TAG, "Failed to load image.", fne);
+            return null;
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Failed to load image.", e);
+            return null;
+        } finally {
+            try {
+                input.close();
+            } catch (IOException ioe) {
+
+            }
+        }
     }
 
     //set up spinner for 'Type'
-    private void setupSpinner(){
+    private void setupSpinner() {
         //set up array adapter to take spinner options
         ArrayAdapter typeSpinnerAdapter = ArrayAdapter.createFromResource(this,
                 R.array.array_type_options, android.R.layout.simple_spinner_item);
@@ -184,6 +280,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         getMenuInflater().inflate(R.menu.editor_menu, menu);
         return true;
     }
+
     //onPrepareOptionsMenu is called when invalidateOptionsMenu is called in onCreate
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -198,21 +295,35 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     //define the required actions upon selecting the various options in the menu
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             //if save selected, save bicycle to database, then exit the activity
             case R.id.action_save:
                 saveBicycle();
-                finish();
+                if (validData) {
+                    finish();
+                } else {
+                    validData = true;
+                }
                 return true;
             //if delete selected, show deletion dialogue
             case R.id.action_delete:
                 deletionDialogue();
                 return true;
-            //TODO complete functionality of home button, with dialogue
-            //if back button pressed, finish activity
-            //case android.R.id.home:
-             //   this.finish();
-             //   return true;
+            //if home button pressed, check for changes and finish activity
+            case android.R.id.home:
+                // If some fields have changed, setup a dialog to warn the user.
+                DialogInterface.OnClickListener discardButtonClickListener =
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // "Discard" button clicked, close the current activity.
+                                finish();
+                            }
+                        };
+
+                // Show dialog that there are unsaved changes
+                showUnsavedChangesDialog(discardButtonClickListener);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -224,30 +335,30 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             super.onBackPressed();
             return;
         }
-            // If some fields have changed, setup a dialog to warn the user.
-            DialogInterface.OnClickListener discardButtonClickListener =
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            // "Discard" button clicked, close the current activity.
-                            finish();
-                        }
-                    };
+        // If some fields have changed, setup a dialog to warn the user.
+        DialogInterface.OnClickListener discardButtonClickListener =
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // "Discard" button clicked, close the current activity.
+                        finish();
+                    }
+                };
 
-            // Show dialog that there are unsaved changes
-            showUnsavedChangesDialog(discardButtonClickListener);
+        // Show dialog that there are unsaved changes
+        showUnsavedChangesDialog(discardButtonClickListener);
     }
 
     //unsaved changes dialogue, to sometimes be used when back button is pressed
     private void showUnsavedChangesDialog(
 
             DialogInterface.OnClickListener discardButtonClickListener) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                //set initial message
-                builder.setMessage(R.string.unsaved_changes_message);
-                //set positive and negative response messages, if negative, dismiss dialogue
-                builder.setPositiveButton(R.string.discard, discardButtonClickListener);
-                builder.setNegativeButton(R.string.continue_editing, new DialogInterface.OnClickListener() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        //set initial message
+        builder.setMessage(R.string.unsaved_changes_message);
+        //set positive and negative response messages, if negative, dismiss dialogue
+        builder.setPositiveButton(R.string.discard, discardButtonClickListener);
+        builder.setNegativeButton(R.string.continue_editing, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 if (dialog != null) {
                     dialog.dismiss();
@@ -260,38 +371,41 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         alertDialog.show();
     }
 
-
     //set up method for INSERTING or UPDATING a bicycle
-    private void saveBicycle(){
+    private void saveBicycle() {
         //retrieve input from edit text fields, and check if they're blank
         String modelString = mModelEditText.getText().toString().trim();
         String priceString = mPriceEditText.getText().toString().trim();
         String supplierString = mSupplierEditText.getText().toString().trim();
 
         if (mCurrentBicycleUri == null &&
-            TextUtils.isEmpty(modelString) && TextUtils.isEmpty(priceString)
-                    && TextUtils.isEmpty(supplierString) && mType == BicycleEntry.TYPE_UNKNOWN) {
+                TextUtils.isEmpty(modelString) && TextUtils.isEmpty(priceString)
+                && TextUtils.isEmpty(supplierString) && mType == BicycleEntry.TYPE_UNKNOWN) {
             //if blank, exit as no changes need be changed
             return;
         }
 
-        //to enable us to pass data into the database, we need to create a ContentValues object
-        ContentValues values = new ContentValues();
-
         //before entering values into the ContentValues object, check for null values
-        if(TextUtils.isEmpty(modelString)) {
-            Toast.makeText(this, getString(R.string.valid_model), Toast.LENGTH_SHORT);
-        } else if(mType < 0) {
-            Toast.makeText(this, getString(R.string.valid_type), Toast.LENGTH_SHORT);
-        } else if(mQuantity < 0) {
-            Toast.makeText(this, getString(R.string.valid_quantity), Toast.LENGTH_SHORT);
+        if (TextUtils.isEmpty(modelString)) {
+            Toast.makeText(this, getString(R.string.valid_model), Toast.LENGTH_SHORT).show();
+            validData = false;
+        } else if (mType < 0) {
+            Toast.makeText(this, getString(R.string.valid_type), Toast.LENGTH_SHORT).show();
+            validData = false;
+        } else if (mQuantity < 0) {
+            Toast.makeText(this, getString(R.string.valid_quantity), Toast.LENGTH_SHORT).show();
+            validData = false;
             //TODO: check image is not null
-        } else if(TextUtils.isEmpty(priceString)) {
-            Toast.makeText(this, getString(R.string.valid_price), Toast.LENGTH_SHORT);
-        } else if(TextUtils.isEmpty(supplierString)) {
-            Toast.makeText(this, getString(R.string.valid_supplier), Toast.LENGTH_SHORT);
+        } else if (TextUtils.isEmpty(priceString)) {
+            Toast.makeText(this, getString(R.string.valid_price), Toast.LENGTH_SHORT).show();
+            validData = false;
+        } else if (TextUtils.isEmpty(supplierString)) {
+            Toast.makeText(this, getString(R.string.valid_supplier), Toast.LENGTH_SHORT).show();
+            validData = false;
         }
 
+        //to enable us to pass data into the database, we need to create a ContentValues object
+        ContentValues values = new ContentValues();
         //when error checking passed, enter values into ContentValues object
         values.put(BicycleEntry.COLUMN_BIKE_MODEL, modelString);
         values.put(BicycleEntry.COLUMN_BIKE_TYPE, mType);
@@ -302,21 +416,21 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         //if this is a new bicycle, insert into database
         //notify the user of the success/failure of insertion
-        if (mCurrentBicycleUri == null) {
+        if (mCurrentBicycleUri == null && validData) {
             Uri newBicycleUri = getContentResolver().insert(BicycleContract.CONTENT_URI, values);
 
-            if(newBicycleUri == null) {
+            if (newBicycleUri == null) {
                 Toast.makeText(this, getString(R.string.error_inserting),
                         Toast.LENGTH_SHORT).show();
             } else {
-                    Toast.makeText(this, getString(R.string.insertion_complete),
-                            Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.insertion_complete),
+                        Toast.LENGTH_SHORT).show();
             }
             //if this is an existing bicycle, update the database
             //notify the user of the success/failure of update
-        } else {
-            int updatedRows = getContentResolver().update(mCurrentBicycleUri, values,null,null);
-            if(updatedRows == 0) {
+        } else if (mCurrentBicycleUri != null && validData) {
+            int updatedRows = getContentResolver().update(mCurrentBicycleUri, values, null, null);
+            if (updatedRows == 0) {
                 Toast.makeText(this, getString(R.string.error_updating),
                         Toast.LENGTH_SHORT).show();
             } else {
@@ -327,11 +441,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     //set up a method to DELETE a bicycle from the database
-    private void deleteBicycle(){
+    private void deleteBicycle() {
         //can only delete an existing bicycle, so exit the activity otherwise
         if (mCurrentBicycleUri != null) {
             int rowsDeleted = getContentResolver().delete(mCurrentBicycleUri, null, null);
-            if(rowsDeleted == 0) {
+            if (rowsDeleted == 0) {
                 Toast.makeText(this, getString(R.string.delete_error),
                         Toast.LENGTH_SHORT).show();
             } else {
@@ -354,7 +468,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 BicycleEntry.COLUMN_BIKE_TYPE,
                 BicycleEntry.COLUMN_PRICE,
                 BicycleEntry.COLUMN_QUANTITY,
-                BicycleEntry.COLUMN_SUPPLIER };
+                BicycleEntry.COLUMN_SUPPLIER};
 
         return new CursorLoader(this,
                 mCurrentBicycleUri,
@@ -362,7 +476,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 null,
                 null,
                 null);
-        }
+    }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
@@ -372,7 +486,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
 
         //extract data from first (and only) row of cursor
-        if (data.moveToFirst()){
+        if (data.moveToFirst()) {
             int pictureColumnIndex = data.getColumnIndexOrThrow(BicycleEntry.COLUMN_IMAGE);
             int modelColumnIndex = data.getColumnIndex(BicycleEntry.COLUMN_BIKE_MODEL);
             int typeColumnIndex = data.getColumnIndex(BicycleEntry.COLUMN_BIKE_TYPE);
@@ -396,7 +510,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
             // Check if the image uri is null
             if (mImageUri != null) {
-                // Show the image on the imageView
+                // Show the image on the imageButton
                 mImageView.setImageURI(mImageUri);
             } else {
                 // Use the placeholder image instead
@@ -408,7 +522,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             mQuantityTextView.setText(String.valueOf(mQuantity));
             mSupplierEditText.setText(bikeSupplier);
             //set up a switch statement for type, that will display the right spinner selection
-            switch(bikeType){
+            switch (bikeType) {
                 case BicycleEntry.TYPE_TOURING:
                     mTypeSpinner.setSelection(0);
                     break;
@@ -441,7 +555,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     //dialogue that requires user to confirm the deletion of a bicycle
-    private void deletionDialogue(){
+    private void deletionDialogue() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.delete_confirmation);
         //if confirmed, delete the Bicycle
@@ -466,27 +580,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         alertDialog.show();
     }
 
-    //onActivityResult method gets called when image view is clicked
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        // If the image has been selected, get the image uri
-        if (resultCode == RESULT_OK) {
-            mImageUri = data.getData();
-
-            // Check if the image uri is null
-            if (mImageUri != null) {
-                // Show the image on the imageView
-                mImageView.setImageURI(mImageUri);
-            } else {
-                // Show the placeholder instead
-                mImageView.setImageDrawable(getResources().getDrawable(R.drawable.bicycle_shadow, null));
-            }
-        }
-    }
-
     //set method for ordering supplier to order more stock
-    public void emailSupplier(View v){
+    public void emailSupplier(View v) {
         Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
         emailIntent.setData(Uri.parse("mailto:"));
         //TODO: set email address to the EditText entry

@@ -31,7 +31,11 @@
     <string name="cancel">Cancel</string>
     <string name="sale">Sale</string>
     <string name="quantity">Quantity remaining: </string>
-    <string name="price">Price: </string>
+    <string name="bicycle_model">Bicycle model:</string>
+    <string name="type">Type:</string>
+    <string name="supplier">Supplier:</string>
+    <string name="price">Price:</string>
+    <string name="click_to_add">add image</string>
     <string name="out_of_stock">Out of stock!</string>
     <string name="left_in_stock">left in stock</string>
     <string name="unsaved_changes_message">Leave without saving changes?</string>

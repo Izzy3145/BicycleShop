@@ -113,10 +113,13 @@ public class CatalogueActivity extends AppCompatActivity implements LoaderManage
      * Helper method to insert hardcoded pet data into the database. For debugging purposes only.
      */
     private void insertPet() {
+        //get Uri from drawable and convert URI to string
+        Uri uri = Uri.parse("android.resource://com.example.android.bicycleshop/drawable/bicycle_shadow");
+        String imageString = uri.toString();
         // Create a ContentValues object where column names are the keys,
         // and Toto's pet attributes are the values.
         ContentValues values = new ContentValues();
-        values.put(BicycleEntry.COLUMN_IMAGE, R.drawable.bicycle_shadow);
+        values.put(BicycleEntry.COLUMN_IMAGE, imageString);
         values.put(BicycleEntry.COLUMN_BIKE_MODEL, "Ribble R872");
         values.put(BicycleEntry.COLUMN_BIKE_TYPE, BicycleEntry.TYPE_HYBRID);
         values.put(BicycleEntry.COLUMN_PRICE, "820");

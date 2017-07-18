@@ -1,49 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/large_border"
+    android:orientation="vertical">
 
-    <!-- product image -->
-
-    <ImageView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/image_view"/>
+        android:orientation="horizontal">
 
-    <!-- product model -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Bicycle model:"/>
+            <!-- product image -->
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:hint="@string/model_hint"
-        android:id="@+id/model" />
+            <ImageView
+                android:id="@+id/image_view"
+                android:layout_width="@dimen/image_size"
+                android:layout_height="@dimen/image_size"
+                android:padding="@dimen/medium_border"
+                android:src="@drawable/ic_add_a_photo" />
 
-    <!-- product type -->
+            <Button
+                android:id="@+id/image_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/medium_border"
+                android:text="@string/click_to_add"
+                android:textSize="@dimen/large_text" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text = "Type:"/>
+        </LinearLayout>
 
-    <Spinner
-        android:id="@+id/spinner_type"
-        android:layout_height="48dp"
-        android:layout_width="wrap_content"
-        android:paddingRight="16dp"
-        android:spinnerMode="dropdown"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- product model -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/medium_border"
+                android:text="@string/bicycle_model"
+                android:textSize="@dimen/large_text"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/model"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="@string/model_hint"
+                android:padding="@dimen/medium_border" />
+
+            <!-- product type -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/medium_border"
+                android:text="@string/type"
+                android:textSize="@dimen/large_text"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/spinner_type"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:padding="@dimen/medium_border"
+                android:spinnerMode="dropdown" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <!-- product quantity -->
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text = "Quantity:"/>
+        android:padding="@dimen/medium_border"
+        android:text="@string/quantity"
+        android:textSize="@dimen/large_text"
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -51,30 +92,39 @@
         android:orientation="horizontal">
 
         <Button
+            android:id="@+id/plus_one_stock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/plus_one_stock"
-            android:text="@string/plus_sign"/>
+            android:padding="@dimen/large_border"
+            android:text="@string/plus_sign"
+            android:textSize="@dimen/large_text" />
 
         <TextView
+            android:id="@+id/quantity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/quantity"/>
+            android:padding="@dimen/large_border"
+            android:textSize="@dimen/large_text" />
 
         <Button
+            android:id="@+id/less_one_stock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/less_one_stock"
-            android:text="@string/minus_sign"/>
+            android:padding="@dimen/large_border"
+            android:text="@string/minus_sign"
+            android:textSize="@dimen/large_text" />
 
-        </LinearLayout>
+    </LinearLayout>
 
     <!-- product price -->
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text = "Price:"/>
+        android:padding="@dimen/medium_border"
+        android:text="@string/price"
+        android:textSize="@dimen/large_text"
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -84,13 +134,17 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/pound_sign"/>
+            android:padding="@dimen/medium_border"
+            android:text="@string/pound_sign"
+            android:textSize="@dimen/large_text"
+            android:textStyle="bold" />
 
         <EditText
+            android:id="@+id/price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="@string/price_hint"
-            android:id="@+id/price"/>
+            android:padding="@dimen/medium_border" />
 
     </LinearLayout>
 
@@ -99,25 +153,32 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text = "Supplier:"/>
+        android:padding="@dimen/medium_border"
+        android:text="@string/supplier"
+        android:textSize="@dimen/large_text"
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:orientation="horizontal">
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:hint="@string/supplier_email_hint"
-        android:id="@+id/supplier"/>
-
-        <Button
+        <EditText
+            android:id="@+id/supplier"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:hint="@string/supplier_email_hint"
+            android:padding="@dimen/medium_border" />
+
+        <Button
             android:id="@+id/reorder_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="emailSupplier"
+            android:padding="@dimen/medium_border"
             android:text="@string/reorder"
-            android:onClick="emailSupplier"/>
+            android:textSize="@dimen/large_text" />
 
     </LinearLayout>
 
