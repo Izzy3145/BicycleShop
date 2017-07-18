@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -20,6 +21,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,13 +39,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     //initialize a Cursor loader
     private static final int EDITOR_BICYCLE_LOADER = 0;
 
-    //intialize the spinner
+    //initialize the spinner
     private Spinner mTypeSpinner;
 
     //initialize the type
     private int mType = BicycleEntry.TYPE_UNKNOWN;
 
-    //intialise the other EditText fields
+    //intialize the views
+    private ImageView mImageView;
     private EditText mModelEditText;
     private EditText mPriceEditText;
     private int mQuantity;
@@ -51,6 +54,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private Button mPlusOneStock;
     private Button mLessOneStock;
     private EditText mSupplierEditText;
+
+    /// Uri of image on the device's storage
+    private static Uri mImageUri;
 
     //set up the onTouchListener variable, default is false
     private boolean mBicycleHasChanged = false;
@@ -93,6 +99,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         setupSpinner();
 
         //set other views
+        mImageView = (ImageView)findViewById(R.id.image_view);
         mModelEditText = (EditText)findViewById(R.id.model);
         mPriceEditText = (EditText)findViewById(R.id.price);
         mSupplierEditText = (EditText)findViewById(R.id.supplier);
@@ -121,6 +128,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         });
 
         //set up onTouchListeners on each view, so we know when something has been changed
+        //TODO add onClick listener for image View mImageView.setOnClickListener(setImage());
         mModelEditText.setOnTouchListener(mTouchListener);
         mTypeSpinner.setOnTouchListener(mTouchListener);
         mPriceEditText.setOnTouchListener(mTouchListener);
@@ -191,14 +199,20 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
+            //if save selected, save bicycle to database, then exit the activity
             case R.id.action_save:
-                //if save selected, save bicycle to database, then exit the activity
                 saveBicycle();
                 finish();
                 return true;
+            //if delete selected, show deletion dialogue
             case R.id.action_delete:
                 deletionDialogue();
                 return true;
+            //TODO complete functionality of home button, with dialogue
+            //if back button pressed, finish activity
+            //case android.R.id.home:
+             //   this.finish();
+             //   return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -210,18 +224,18 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             super.onBackPressed();
             return;
         }
-        // If some fields have changed, setup a dialog to warn the user.
-        DialogInterface.OnClickListener discardButtonClickListener =
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        // "Discard" button clicked, close the current activity.
-                        finish();
-                    }
-                };
+            // If some fields have changed, setup a dialog to warn the user.
+            DialogInterface.OnClickListener discardButtonClickListener =
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // "Discard" button clicked, close the current activity.
+                            finish();
+                        }
+                    };
 
-        // Show dialog that there are unsaved changes
-        showUnsavedChangesDialog(discardButtonClickListener);
+            // Show dialog that there are unsaved changes
+            showUnsavedChangesDialog(discardButtonClickListener);
     }
 
     //unsaved changes dialogue, to sometimes be used when back button is pressed
@@ -263,14 +277,31 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         //to enable us to pass data into the database, we need to create a ContentValues object
         ContentValues values = new ContentValues();
+
+        //before entering values into the ContentValues object, check for null values
+        if(TextUtils.isEmpty(modelString)) {
+            Toast.makeText(this, getString(R.string.valid_model), Toast.LENGTH_SHORT);
+        } else if(mType < 0) {
+            Toast.makeText(this, getString(R.string.valid_type), Toast.LENGTH_SHORT);
+        } else if(mQuantity < 0) {
+            Toast.makeText(this, getString(R.string.valid_quantity), Toast.LENGTH_SHORT);
+            //TODO: check image is not null
+        } else if(TextUtils.isEmpty(priceString)) {
+            Toast.makeText(this, getString(R.string.valid_price), Toast.LENGTH_SHORT);
+        } else if(TextUtils.isEmpty(supplierString)) {
+            Toast.makeText(this, getString(R.string.valid_supplier), Toast.LENGTH_SHORT);
+        }
+
+        //when error checking passed, enter values into ContentValues object
         values.put(BicycleEntry.COLUMN_BIKE_MODEL, modelString);
         values.put(BicycleEntry.COLUMN_BIKE_TYPE, mType);
         values.put(BicycleEntry.COLUMN_QUANTITY, mQuantity);
+        values.put(BicycleEntry.COLUMN_IMAGE, String.valueOf(mImageUri));
         values.put(BicycleEntry.COLUMN_PRICE, priceString);
         values.put(BicycleEntry.COLUMN_SUPPLIER, supplierString);
 
-        //if this is a new bicycle, insert into database, otherwise update the database
-        //notify the user of the success/failure of each action
+        //if this is a new bicycle, insert into database
+        //notify the user of the success/failure of insertion
         if (mCurrentBicycleUri == null) {
             Uri newBicycleUri = getContentResolver().insert(BicycleContract.CONTENT_URI, values);
 
@@ -281,6 +312,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                     Toast.makeText(this, getString(R.string.insertion_complete),
                             Toast.LENGTH_SHORT).show();
             }
+            //if this is an existing bicycle, update the database
+            //notify the user of the success/failure of update
         } else {
             int updatedRows = getContentResolver().update(mCurrentBicycleUri, values,null,null);
             if(updatedRows == 0) {
@@ -316,6 +349,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] projection = {
+                BicycleEntry.COLUMN_IMAGE,
                 BicycleEntry.COLUMN_BIKE_MODEL,
                 BicycleEntry.COLUMN_BIKE_TYPE,
                 BicycleEntry.COLUMN_PRICE,
@@ -339,16 +373,35 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         //extract data from first (and only) row of cursor
         if (data.moveToFirst()){
+            int pictureColumnIndex = data.getColumnIndexOrThrow(BicycleEntry.COLUMN_IMAGE);
             int modelColumnIndex = data.getColumnIndex(BicycleEntry.COLUMN_BIKE_MODEL);
             int typeColumnIndex = data.getColumnIndex(BicycleEntry.COLUMN_BIKE_TYPE);
             int quantityColumnIndex = data.getColumnIndex(BicycleEntry.COLUMN_QUANTITY);
             int priceColumnIndex = data.getColumnIndex(BicycleEntry.COLUMN_PRICE);
             int supplierColumnIndex = data.getColumnIndex(BicycleEntry.COLUMN_SUPPLIER);
 
+            String bicyclePicture = data.getString(pictureColumnIndex);
             String bikeModel = data.getString(modelColumnIndex);
             int bikeType = data.getInt(typeColumnIndex);
+            mQuantity = data.getInt(quantityColumnIndex);
             String bikePrice = data.getString(priceColumnIndex);
             String bikeSupplier = data.getString(supplierColumnIndex);
+
+            // Convert the picture to uri
+            if (bicyclePicture != null) {
+                mImageUri = Uri.parse(bicyclePicture);
+            } else {
+                mImageUri = null;
+            }
+
+            // Check if the image uri is null
+            if (mImageUri != null) {
+                // Show the image on the imageView
+                mImageView.setImageURI(mImageUri);
+            } else {
+                // Use the placeholder image instead
+                mImageView.setImageDrawable(getDrawable(R.drawable.bicycle_shadow));
+            }
 
             mModelEditText.setText(bikeModel);
             mPriceEditText.setText(bikePrice);
@@ -413,11 +466,31 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         alertDialog.show();
     }
 
+    //onActivityResult method gets called when image view is clicked
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // If the image has been selected, get the image uri
+        if (resultCode == RESULT_OK) {
+            mImageUri = data.getData();
+
+            // Check if the image uri is null
+            if (mImageUri != null) {
+                // Show the image on the imageView
+                mImageView.setImageURI(mImageUri);
+            } else {
+                // Show the placeholder instead
+                mImageView.setImageDrawable(getResources().getDrawable(R.drawable.bicycle_shadow, null));
+            }
+        }
+    }
+
     //set method for ordering supplier to order more stock
     public void emailSupplier(View v){
         Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
         emailIntent.setData(Uri.parse("mailto:"));
-        emailIntent.putExtra(Intent.EXTRA_EMAIL, "example@gmail.com");
+        //TODO: set email address to the EditText entry
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"example@gmail.com"});
         emailIntent.putExtra(Intent.EXTRA_SUBJECT, "New Bicycle Order");
         if (emailIntent.resolveActivity(getPackageManager()) != null) {
             startActivity(emailIntent);

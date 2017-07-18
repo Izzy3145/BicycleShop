@@ -84,9 +84,11 @@ public class CatalogueActivity extends AppCompatActivity implements LoaderManage
         //define a projection that includes the columns we want to display
         String [] projection = {
                 BicycleEntry._ID,
+                BicycleEntry.COLUMN_IMAGE,
                 BicycleEntry.COLUMN_BIKE_MODEL,
                 BicycleEntry.COLUMN_PRICE,
-                BicycleEntry.COLUMN_QUANTITY};
+                BicycleEntry.COLUMN_QUANTITY
+                };
 
         //loader to execute the Content Providers query
         return new CursorLoader(this, BicycleContract.CONTENT_URI, projection, null,
@@ -114,6 +116,7 @@ public class CatalogueActivity extends AppCompatActivity implements LoaderManage
         // Create a ContentValues object where column names are the keys,
         // and Toto's pet attributes are the values.
         ContentValues values = new ContentValues();
+        values.put(BicycleEntry.COLUMN_IMAGE, R.drawable.bicycle_shadow);
         values.put(BicycleEntry.COLUMN_BIKE_MODEL, "Ribble R872");
         values.put(BicycleEntry.COLUMN_BIKE_TYPE, BicycleEntry.TYPE_HYBRID);
         values.put(BicycleEntry.COLUMN_PRICE, "820");

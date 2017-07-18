@@ -39,7 +39,8 @@ public final class BicycleContract {
         public static final String TABLE_NAME = "bicycles";
         //unique ID for each bicycle, of type integer
         public static final String _ID = BaseColumns._ID;
-        //TODO insert image column as text, see hackathon notes
+        //bicycle picture, of type string
+        public static final String COLUMN_IMAGE = "image";
         //bicycle model, of type string
         public static final String COLUMN_BIKE_MODEL = "model";
         //bicycle type, of type String

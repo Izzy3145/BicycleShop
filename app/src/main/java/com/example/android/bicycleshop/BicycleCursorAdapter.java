@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,19 +40,42 @@ public class BicycleCursorAdapter extends CursorAdapter {
     //binds data to the list item view
     @Override
     public void bindView(View view, final Context context, Cursor cursor) {
+        ImageView pictureImageView = (ImageView) view.findViewById(R.id.list_image_view);
         TextView modelTextView = (TextView)view.findViewById(R.id.model_list_item);
         TextView priceTextView = (TextView)view.findViewById(R.id.price_list_item);
         TextView quantityTextView = (TextView)view.findViewById(R.id.quantity_list_item);
 
+
+
         //find the columns of the attributes that we want to display
+        int pictureColumnIndex = cursor.getColumnIndexOrThrow(BicycleEntry.COLUMN_IMAGE);
         int modelColumnIndex = cursor.getColumnIndexOrThrow(BicycleEntry.COLUMN_BIKE_MODEL);
         int priceColumnIndex = cursor.getColumnIndexOrThrow(BicycleEntry.COLUMN_PRICE);
         int quantityColumnIndex = cursor.getColumnIndexOrThrow(BicycleEntry.COLUMN_QUANTITY);
 
         //retrieve data from the appropriate columns
+        String bicyclePicture = cursor.getString(pictureColumnIndex);
         String bicycleModel = cursor.getString(modelColumnIndex);
         String bicyclePrice = cursor.getString(priceColumnIndex);
         final int bicycleQuantity = cursor.getInt(quantityColumnIndex);
+
+        //convert the picture to URI
+        Uri imageUri;
+        if (bicyclePicture != null) {
+            imageUri = Uri.parse(bicyclePicture);
+        } else {
+            imageUri = null;
+        }
+
+        // Check if the image uri is null
+        if (imageUri != null) {
+            // Show the image on the imageView
+            pictureImageView.setImageURI(imageUri);
+        } else {
+            // Show the placeholder instead
+            pictureImageView.setImageDrawable(context.getResources().getDrawable(R.drawable
+                    .bicycle_shadow, null));
+        }
 
         //update the text views with the values from the database
         modelTextView.setText(bicycleModel);

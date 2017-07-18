@@ -29,12 +29,12 @@ public class BicycleDbHelper extends SQLiteOpenHelper {
         // Create a String that contains the SQL statement to create the bicyce table
         String SQL_CREATE_BICYCLES_TABLE =  "CREATE TABLE " + BicycleEntry.TABLE_NAME + " ("
                 + BicycleEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + BicycleEntry.COLUMN_IMAGE + "TEXT, "
                 + BicycleEntry.COLUMN_BIKE_MODEL + " TEXT NOT NULL, "
                 + BicycleEntry.COLUMN_BIKE_TYPE + " INTEGER NOT NULL, "
                 + BicycleEntry.COLUMN_PRICE + " INTEGER NOT NULL, "
                 + BicycleEntry.COLUMN_QUANTITY + " INTEGER, "
                 + BicycleEntry.COLUMN_SUPPLIER + " TEXT);";
-        //TODO add in images column
 
         // Execute the SQL statement
         db.execSQL(SQL_CREATE_BICYCLES_TABLE);

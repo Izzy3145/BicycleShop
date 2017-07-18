@@ -126,6 +126,11 @@ public class BicycleProvider extends ContentProvider {
 
     private Uri insertBicycle(Uri uri, ContentValues values) {
         //check for null values, and throw error if null
+        String image = values.getAsString(BicycleEntry.COLUMN_IMAGE);
+        if (image == null) {
+            throw new IllegalArgumentException("Image needs specifying");
+        }
+        //check for null values, and throw error if null
         String model = values.getAsString(BicycleEntry.COLUMN_BIKE_MODEL);
         if (model == null) {
             throw new IllegalArgumentException("Model needs specifying");
@@ -224,6 +229,13 @@ public class BicycleProvider extends ContentProvider {
     }
 
     private int updateBicycle(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        //check for null values, and throw error if null
+        if(values.containsKey(BicycleEntry.COLUMN_IMAGE)) {
+            String image = values.getAsString(BicycleEntry.COLUMN_IMAGE);
+            if (image == null) {
+                throw new IllegalArgumentException("Image needs specifying");
+            }
+        }
         //check for null values, and throw error if null
         if(values.containsKey(BicycleEntry.COLUMN_BIKE_MODEL)) {
             String model = values.getAsString(BicycleEntry.COLUMN_BIKE_MODEL);

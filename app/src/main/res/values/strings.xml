@@ -37,4 +37,9 @@
     <string name="unsaved_changes_message">Leave without saving changes?</string>
     <string name="discard">Discard</string>
     <string name="continue_editing">Continue editing</string>
+    <string name="valid_model">Please enter valid model</string>
+    <string name="valid_type">Please enter valid type</string>
+    <string name="valid_quantity">Please enter valid quantity</string>
+    <string name="valid_price">Please enter valid price</string>
+    <string name="valid_supplier">Please enter valid supplier</string>
 </resources>

@@ -9,10 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".CatalogueActivity">
+        <activity android:name=".CatalogueActivity"
+            android:label="Bicycle Shop Stock List">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -22,7 +22,11 @@
             android:authorities="com.example.android.bicycles"
             android:exported="false" />
 
-        <activity android:name=".EditorActivity">
+        <activity android:name=".EditorActivity"
+            android:parentActivityName=".CatalogueActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CatalogueActivity" />
             <intent-filter>
                 <action android:name="android.intent.action.SENDTO" />
                 <data android:scheme="mailto" />
