@@ -181,6 +181,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
+    //get bitmap from Uri
+    //this code taken from https://github.com/crlsndrsjmnz/MyShareImageExample/blob/master/app/src/main/java/co/carlosandresjimenez/android/myshareimageexample/MainActivity.java
+    //as suggested in a 1-2-1 session with Kunal
     public Bitmap getBitmapFromUri(Uri mImageUri) {
 
         if (mImageUri == null || mImageUri.toString().isEmpty())
