@@ -176,7 +176,6 @@
             android:id="@+id/reorder_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="emailSupplier"
             android:padding="@dimen/medium_border"
             android:text="@string/reorder"
             android:textSize="@dimen/large_text" />

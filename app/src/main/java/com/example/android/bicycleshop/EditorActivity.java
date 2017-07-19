@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.example.android.bicycleshop.data.BicycleProvider.LOG_TAG;
+import static java.lang.String.valueOf;
 
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -64,6 +65,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private Button mPlusOneStock;
     private Button mLessOneStock;
     private EditText mSupplierEditText;
+    private Button mReorderButton;
     //set up the onTouchListener variable, default is false
     private boolean mBicycleHasChanged = false;
     //set up the on TouchListener method, to be used later in onCreate
@@ -117,7 +119,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             @Override
             public void onClick(View v) {
                 mQuantity++;
-                mQuantityTextView.setText(String.valueOf(mQuantity));
+                mQuantityTextView.setText(valueOf(mQuantity));
             }
         });
 
@@ -127,9 +129,27 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             public void onClick(View v) {
                 if (mQuantity > 0) {
                     mQuantity--;
-                    mQuantityTextView.setText(String.valueOf(mQuantity));
+                    mQuantityTextView.setText(valueOf(mQuantity));
                 } else {
                     Toast.makeText(EditorActivity.this, getString(R.string.out_of_stock), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        mReorderButton = (Button) findViewById(R.id.reorder_button);
+        mReorderButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //get current supplier email
+                String currentEmail = mSupplierEditText.getText().toString();
+                String[] supplierEmails = new String[]{currentEmail};
+
+                //send email content
+                Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                emailIntent.setData(Uri.parse("mailto:"));
+                emailIntent.putExtra(Intent.EXTRA_EMAIL, supplierEmails);
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "New Bicycle Order");
+                if (emailIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(emailIntent);
                 }
             }
         });
@@ -143,6 +163,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mPlusOneStock.setOnTouchListener(mTouchListener);
         mLessOneStock.setOnTouchListener(mTouchListener);
 
+        //set intent to take user to gallery when the "Add Photo" button is pressed
         mImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -161,7 +182,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         });
     }
 
-    //onActivityResult method gets called when image view is clicked
+    //onActivityResult method gets called when image button is clicked
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //super.onActivityResult(requestCode, resultCode, data);
@@ -374,6 +395,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     //set up method for INSERTING or UPDATING a bicycle
     private void saveBicycle() {
         //retrieve input from edit text fields, and check if they're blank
+        String pictureString = String.valueOf(mImageUri);
         String modelString = mModelEditText.getText().toString().trim();
         String priceString = mPriceEditText.getText().toString().trim();
         String supplierString = mSupplierEditText.getText().toString().trim();
@@ -386,13 +408,16 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
 
         //before entering values into the ContentValues object, check for null values
-        if (TextUtils.isEmpty(modelString)) {
+        if (pictureString.equals("null")) {
+            Toast.makeText(this, getString(R.string.valid_photo), Toast.LENGTH_SHORT).show();
+            validData = false;
+        } else if (TextUtils.isEmpty(modelString)) {
             Toast.makeText(this, getString(R.string.valid_model), Toast.LENGTH_SHORT).show();
             validData = false;
         } else if (mType < 0) {
             Toast.makeText(this, getString(R.string.valid_type), Toast.LENGTH_SHORT).show();
             validData = false;
-        } else if (mQuantity < 0) {
+        } else if (mQuantity <= 0) {
             Toast.makeText(this, getString(R.string.valid_quantity), Toast.LENGTH_SHORT).show();
             validData = false;
         } else if (TextUtils.isEmpty(priceString)) {
@@ -409,7 +434,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         values.put(BicycleEntry.COLUMN_BIKE_MODEL, modelString);
         values.put(BicycleEntry.COLUMN_BIKE_TYPE, mType);
         values.put(BicycleEntry.COLUMN_QUANTITY, mQuantity);
-        values.put(BicycleEntry.COLUMN_IMAGE, String.valueOf(mImageUri));
+        values.put(BicycleEntry.COLUMN_IMAGE, valueOf(mImageUri));
         values.put(BicycleEntry.COLUMN_PRICE, priceString);
         values.put(BicycleEntry.COLUMN_SUPPLIER, supplierString);
 
@@ -518,7 +543,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
             mModelEditText.setText(bikeModel);
             mPriceEditText.setText(bikePrice);
-            mQuantityTextView.setText(String.valueOf(mQuantity));
+            mQuantityTextView.setText(valueOf(mQuantity));
             mSupplierEditText.setText(bikeSupplier);
             //set up a switch statement for type, that will display the right spinner selection
             switch (bikeType) {
@@ -549,7 +574,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mModelEditText.setText("");
         mTypeSpinner.setSelection(5);
         mPriceEditText.setText("");
-        mQuantityTextView.setText(String.valueOf(0));
+        mQuantityTextView.setText(valueOf(0));
         mSupplierEditText.setText("");
     }
 
@@ -577,17 +602,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
-    }
-
-    //set method for ordering supplier to order more stock
-    public void emailSupplier(View v) {
-        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-        emailIntent.setData(Uri.parse("mailto:"));
-        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"example@gmail.com"});
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "New Bicycle Order");
-        if (emailIntent.resolveActivity(getPackageManager()) != null) {
-            startActivity(emailIntent);
-        }
     }
 }
 
